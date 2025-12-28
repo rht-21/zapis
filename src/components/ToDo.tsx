@@ -10,7 +10,7 @@ interface TodoItem {
 }
 
 const STORAGE_KEY = "zapis-todos";
-const ONE_DAY_MS = 10 * 1000;
+const ONE_DAY_MS = 24 * 60 * 60 * 1000;
 
 const ToDo = () => {
   const [todos, setTodos] = useState<TodoItem[]>([]);
@@ -152,7 +152,7 @@ const ToDo = () => {
             >
               <button
                 onClick={() => toggleTodo(todo.id)}
-                className={`flex-shrink-0 w-5 h-5 rounded border flex items-center justify-center transition-colors ${
+                className={`shrink-0 w-5 h-5 rounded border flex items-center justify-center transition-colors ${
                   todo.completed
                     ? "bg-primary border-primary text-primary-foreground"
                     : "border-muted-foreground/40 hover:border-primary"
