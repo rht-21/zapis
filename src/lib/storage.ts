@@ -1,4 +1,4 @@
-const STORAGE_KEY = import.meta.env.VITE_STORAGE_KEY || "zapis-content";
+const DEFAULT_STORAGE_KEY = import.meta.env.VITE_STORAGE_KEY || "zapis-content";
 
 async function getEncryptionKey(): Promise<CryptoKey> {
   const envKey = import.meta.env.VITE_ENCRYPTION_KEY;
@@ -24,7 +24,10 @@ async function getEncryptionKey(): Promise<CryptoKey> {
   );
 }
 
-export async function saveSecurely(content: string): Promise<void> {
+export async function saveSecurely(
+  content: string,
+  keyName: string = DEFAULT_STORAGE_KEY
+): Promise<void> {
   try {
     const key = await getEncryptionKey();
     const encoder = new TextEncoder();
@@ -43,14 +46,16 @@ export async function saveSecurely(content: string): Promise<void> {
 
     // Convert to base64 for storage
     const base64 = btoa(String.fromCharCode(...combined));
-    localStorage.setItem(STORAGE_KEY, base64);
+    localStorage.setItem(keyName, base64);
   } catch (error) {
     console.error("Error saving securely:", error);
   }
 }
 
-export async function loadSecurely(): Promise<string | null> {
-  const base64 = localStorage.getItem(STORAGE_KEY);
+export async function loadSecurely(
+  keyName: string = DEFAULT_STORAGE_KEY
+): Promise<string | null> {
+  const base64 = localStorage.getItem(keyName);
   if (!base64) return null;
 
   try {
