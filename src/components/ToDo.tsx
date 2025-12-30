@@ -110,7 +110,7 @@ const ToDo = () => {
         ToDo
       </span>
 
-      <div className="p-6 pt-16 border-b border-primary/10">
+      <div className="px-4 py-6 pt-10 border-b border-primary/10">
         <div className="relative flex items-center">
           <input
             type="text"
@@ -130,7 +130,7 @@ const ToDo = () => {
         </div>
       </div>
 
-      <div className="flex-1 overflow-auto p-4 space-y-2">
+      <div className="flex-1 overflow-auto px-4 py-6 space-y-2">
         {isLoading ? (
           <div className="text-center text-muted-foreground mt-10">
             Loading...
