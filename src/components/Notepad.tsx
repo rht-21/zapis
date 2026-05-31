@@ -1,49 +1,67 @@
-import React, { useRef, useEffect } from "react";
+import { useEffect, useRef } from "react";
+import { useEditor, EditorContent } from "@tiptap/react";
+import StarterKit from "@tiptap/starter-kit";
+import Placeholder from "@tiptap/extension-placeholder";
+import TaskList from "@tiptap/extension-task-list";
+import TaskItem from "@tiptap/extension-task-item";
 import { saveSecurely, loadSecurely } from "../lib/storage";
 
-const Notepad: React.FC = () => {
-  const editorRef = useRef<HTMLDivElement>(null);
+const Notepad = () => {
   const timeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
+  const editor = useEditor({
+    extensions: [
+      StarterKit,
+      TaskList,
+      TaskItem.configure({ nested: true }),
+      Placeholder.configure({
+        placeholder: "Start writing… type '#', '-', or '- [ ]' for markdown",
+      }),
+    ],
+    editorProps: {
+      attributes: {
+        class:
+          "tiptap px-12 py-16 outline-none min-h-full h-full overflow-auto font-sans text-base",
+      },
+    },
+    onUpdate: ({ editor }) => {
+      if (timeoutRef.current) clearTimeout(timeoutRef.current);
+      timeoutRef.current = setTimeout(() => {
+        saveSecurely(editor.getHTML());
+      }, 1000);
+    },
+  });
+
+  // Load any previously saved (encrypted HTML) content once the editor is ready.
   useEffect(() => {
+    if (!editor) return;
+    let cancelled = false;
+
     const init = async () => {
       const savedContent = await loadSecurely();
-      if (editorRef.current) {
-        if (savedContent) {
-          editorRef.current.innerHTML = savedContent;
-        } else {
-          // Default content
-          editorRef.current.innerHTML = "<p>Hi, it feels lonely here...</p>";
-        }
-      }
+      if (cancelled || !savedContent) return;
+      // Avoid pushing a redundant update onto the undo stack.
+      editor.commands.setContent(savedContent, { emitUpdate: false });
     };
     init();
+
+    return () => {
+      cancelled = true;
+    };
+  }, [editor]);
+
+  useEffect(() => {
+    return () => {
+      if (timeoutRef.current) clearTimeout(timeoutRef.current);
+    };
   }, []);
 
-  const handleInput = () => {
-    if (timeoutRef.current) {
-      clearTimeout(timeoutRef.current);
-    }
-
-    timeoutRef.current = setTimeout(() => {
-      if (editorRef.current) {
-        saveSecurely(editorRef.current.innerHTML);
-      }
-    }, 1000);
-  };
-
   return (
-    <section className="w-2/3 h-full overflow-auto border-r border-primary/30 relative">
-      <span className="absolute top-0 left-0 bg-primary text-secondary-foreground rounded-br-xl w-14 uppercase font-medium tracking-wide text-sm flex items-center justify-center pr-1 py-1">
+    <section className="w-2/3 h-full overflow-hidden glass-panel rounded-2xl relative">
+      <span className="absolute top-0 left-0 z-10 bg-linear-to-br from-primary to-accent text-primary-foreground rounded-br-2xl rounded-tl-2xl px-4 py-1.5 uppercase font-semibold tracking-wide text-xs flex items-center justify-center shadow-lg">
         Note
       </span>
-      <div
-        ref={editorRef}
-        contentEditable
-        suppressContentEditableWarning
-        onInput={handleInput}
-        className="px-12 py-16 outline-none min-h-full font-sans text-base"
-      />
+      <EditorContent editor={editor} className="h-full overflow-auto" />
     </section>
   );
 };

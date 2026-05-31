@@ -1,3 +1,4 @@
+import GradientBackdrop from "./components/GradientBackdrop";
 import MobileBlockedScreen from "./components/MobileBlockedScreen";
 import Notepad from "./components/Notepad";
 import ToDo from "./components/ToDo";
@@ -11,10 +12,13 @@ const App = () => {
   }
 
   return (
-    <div className="flex items-center justify-between h-[calc(100dvh-112px)] w-full font-sans">
-      <Notepad />
-      <ToDo />
-    </div>
+    <>
+      <GradientBackdrop />
+      <div className="flex items-stretch justify-between gap-4 h-[calc(100dvh-112px+64px)] w-full font-sans px-4 py-4">
+        <Notepad />
+        <ToDo />
+      </div>
+    </>
   );
 };
 
